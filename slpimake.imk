@@ -1,0 +1,52 @@
+/* EDITION ACO9 (REL002), ITD ACST.174 {95/05/28 20:26:30) -- CLOSED */
+/* PLS */
+/******************************************************************************\
+********************************************************************************
+**																			  **
+**								SLPIMAKE									  **
+**																			  **
+********************************************************************************
+\******************************************************************************/
+
+/*
+*	NOTE:
+*	----
+*	When invoking make on the Makefile created from this Imakefile,
+*	you must have a ROOTDIR environment variable set to the top of
+*	your loadbuild hierarchy.
+*/
+
+/**************************/
+/* Set Dp All Definitions */
+/**************************/
+
+/* Set the debug options ('make1 looks at CDEBUGFLAGS) if DEBUG defined */
+#ifdef DEBUG
+CDEBUGFLAGS = -g -DDEBUG
+#endif
+
+/* Pick the compiler you want, last CC gets used. */
+
+CC	= cc					/* K&R C */
+CC	= CC -Aa -D_HPUX_SOURCE	/* ANSI C */
+
+/* Modules which make up executable(s) */
+SLP_SRCS = slptclfe.c slpgetln.c
+
+SLP_OBJS = slptclfe.o slpgetln.o
+
+SRCS = ${SLP_SRCS}
+OBJS = ${SLP_OBJS}
+
+/* 'make lib<fsi>.a' builds the lib<fsi>.a library */
+NormalLibraryObjectRule()
+NormalLibraryTarget(slp, $(SLP_OBJS))
+
+/*
+ *	'make install' installs the lint library, the exported header
+ *	file and the executable(s).
+ *	NOTE: LINTLIBDIR, INCDIR and BINDIR are set in Imake.tmpl.
+ */
+InstallLibrary(slp, $(LIBDIR))
+
+DependTarget()
