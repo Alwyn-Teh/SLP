@@ -4,11 +4,12 @@ RM = rm -f
 RANLIB = ranlib
 AR = ar rcul
 
+SLP_SRCS = slptclfe.c slpgetln.o
 SLP_OBJS = slptclfe.o slpgetln.o
 
 .c.o:
 		$(RM) $@
-		$(CC) -c $(CFLAGS) $*.c
+		$(CC) -c $(CFLAGS) $^
 
 all:: libslp.a
 

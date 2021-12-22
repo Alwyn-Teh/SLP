@@ -651,7 +651,7 @@ gl_transpose()
 }
 
 void
-Slpqlreplace()
+Slp_gl_replace()
 {
 	gl_overwrite = !gl_overwrite;
 }
