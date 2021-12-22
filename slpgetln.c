@@ -107,7 +107,7 @@ static char resid[] =
 #include <ctype.h>
 #include <errno.h>
 
-#include <slp.h>
+#include "slp.h"
 
 char * Slp_KeystrokesHelpText[] = {
 "Command line keystrokes for editing and history/retrieval -\n",
@@ -547,7 +547,7 @@ char *prompt;
 						gl_del(0);
 					}
 					break;
-				case '\OO5': gl_fixup(-1, gl_cnt);		/* ^E */
+				case '\005': gl_fixup(-1, gl_cnt);		/* ^E */
 					break;
 				case '\006': gl_fixup(-1, gl_pos+1);	/* ^F */
 					break;
@@ -668,7 +668,7 @@ gl_newline()
 	int loc = gl_width - 5;	/* shifts line back to start position */
 
 	if (gl_cnt >= BUF_SIZE - 1) {
-		qlputs("Slp_qetline: input buffer overflow\n");
+		gl_puts("Slp_qetline: input buffer overflow\n");
 		_exit(1);
 	}
 	hist_add() ;	/* only adds if nonblank */
@@ -700,7 +700,7 @@ int loc;
 {
 	int i;
 
-	if (loc == -1 && gl_pos > 0 || loc == 0 && gl_pos < gl_cnt) {
+	if ((loc == -1 && gl_pos > 0) || (loc == 0 && gl_pos < gl_cnt)) {
 		for (i=gl_pos+loc; i < gl_cnt; i++)
 			gl_buf[i] = gl_buf[i+1];
 		gl_fixup(gl_pos+loc, gl_pos+loc);
@@ -779,7 +779,7 @@ int change, cursor;
 		gl_putc('\007');
 		cursor = 0;
 	}
-	if (off_right || off_left && cursor < gl_shift + gl_width - SCROLL / 2)
+	if (off_right || (off_left && cursor < gl_shift + gl_width - SCROLL / 2))
 		extra =2;							/* shift the scrolling boundary */
 	else
 		extra =0;

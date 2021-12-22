@@ -68,6 +68,7 @@ MODIFICATION HISTORY
 /********************************** INCLUDES **********************************/
 #include <stdlib.h> /* For malloc(3C) */
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
@@ -85,7 +86,7 @@ MODIFICATION HISTORY
 #endif
 
 #include <tcl.h>
-#include <slp.h>
+#include "slp.h"
 
 /****************************** GLOBAL VARIABLES ******************************/
 /*
@@ -107,7 +108,7 @@ static struct
 	NULL	/* No buffer created		*/
 };
 
-typedef (*printf_type)ANSI_PROTO((char *,...));
+typedef int (*printf_type)ANSI_PROTO((char *,...));
 int (*Slp_Printf )ANSI_PROTO( (char *fmtstr,...)) = (printf_type)printf;
 
 /* Must NOT let Slp_Printf be overwritten to NULL, if so, reset to printf. */
@@ -177,7 +178,7 @@ char *prompt;
  *					or NULL, if not available/defined.
  *
  *-*************************************************************************/
-char *Slp_GetPrompt()
+char * Slp_GetPrompt()
 {
 	return(slptclfe.prompt);
 }
@@ -222,15 +223,15 @@ void Slp_OutputPrompt()
  *
  *-**********************************************************************/
 #ifdef __STDC__
-int Slp_TclEvalFile(Tcl_Interp *interp, char *fileName)
+int Slp_TclEvalFile(Tcl_Interp *interp, const char *fileName)
 #else
 int Slp_TclEvalFile(interp, fileName)
-	Tcl_Interp *interp;	/* Interpreter in which to process file. */
-	char *fileName;		/* Name of file to process. Tilde-substitution
-	 	 	 	 	 	 * will be performed on this name. */
+	Tcl_Interp *interp;		/* Interpreter in which to process file. */
+	const char *fileName;	/* Name of file to process. Tilde-substitution
+	 	 	 	 	 	 	 * will be performed on this name. */
 #endif
 {
-	int fileld, result;
+	int fileId, result;
 	struct stat statBuf;
 	char *cmdBuffer;
 	Tcl_DString buffer;
@@ -254,30 +255,30 @@ int Slp_TclEvalFile(interp, fileName)
 		goto error;
 	}
 
-	fileld = open(fileName, O_RDONLY, 0) ;
-	if (fileld < 0) {
-		Tcl_AppendResuit(interp, "couldn't read file \"", fileName,
+	fileId = open(fileName, O_RDONLY, 0) ;
+	if (fileId < 0) {
+		Tcl_AppendResult(interp, "couldn't read file \"", fileName,
 							"\": ", Tcl_PosixError(interp), (char *) NULL);
 		goto error;
 	}
 
-	if (fstat(fileld, &statBuf) == -1) {
+	if (fstat(fileId, &statBuf) == -1) {
 		Tcl_AppendResult(interp, "couldn't stat file \"", fileName,
 							"\": ", Tcl_PosixError(interp), (char *) NULL);
-		close(fileld);
+		close(fileId);
 		goto error;
 	}
 
 	cmdBuffer = (char *) ckalloc((unsigned) statBuf.st_size+1);
-	if (read(fileld, cmdBuffer, (size_t) statBuf.st_size) != statBuf.st_size) {
+	if (read(fileId, cmdBuffer, (size_t) statBuf.st_size) != statBuf.st_size) {
 		Tcl_AppendResult(interp, "error in reading file \"", fileName,
 							"\": ", Tcl_PosixError(interp), (char *) NULL);
-		close(fileld);
+		close(fileId);
 		ckfree(cmdBuffer);
 		goto error;
 	}
 
-	if (close(fileld) != 0) {
+	if (close(fileId) != 0) {
 		Tcl_AppendResult(interp, "error closing file \"", fileName,
 							"\": ", Tcl_PosixError(interp), (char *) NULL);
 		ckfree(cmdBuffer);
@@ -292,7 +293,7 @@ int Slp_TclEvalFile(interp, fileName)
 
 		src_ptr = dst_ptr = cmdBuffer;
 
-		while (*src_ptr != NULL)
+		while (*src_ptr != '\0')
 		{
 			if ((*dst_ptr++ = *src_ptr++) == '\\')
 			{
@@ -310,7 +311,7 @@ int Slp_TclEvalFile(interp, fileName)
 				}
 			}
 		}
-		*dst_ptr = NULL;
+		*dst_ptr = '\0';
 	}
 
 	Slp_Command_In_Progress = 1;
@@ -330,7 +331,7 @@ int Slp_TclEvalFile(interp, fileName)
 		 * Record information telling where the error occurred.
 		 */
 
-		sprintf(msg, "\n (file \"%.l50s\" line %d)", fileName, interp->errorLine);
+		sprintf(msg, "\n (file \"%.150s\" line %d)", fileName, interp->errorLine);
 		Tcl_AddErrorInfo(interp, msg);
 	}
 
@@ -376,13 +377,13 @@ error:
  *-**********************************************************************/
 #ifdef __STDC__
 int Slp_TclCmdSource(ClientData dummy, Tcl_Interp *interp,
-					 int argc, char **argv)
+					 int argc, const char **argv)
 #else
 int Slp_TclCmdSource(dummy, interp, argc, argv)
 	ClientData dummy;	/* Not used. */
 	Tcl_Interp *interp;	/* Current interpreter. */
 	int argc;			/* Number of arguments. */
-	char **argv;		/* Argument strings. */
+	const char **argv;	/* Argument strings. */
 #endif
 {
 	if (argc != 2) {
@@ -410,13 +411,13 @@ int Slp_TclCmdSource(dummy, interp, argc, argv)
 *
 *_**********************************************************************/
 #ifdef __STDC__
-int Slp_TclCmdExit(ClientData dummy, Tcl_Interp *interp, int argc, char **argv)
+int Slp_TclCmdExit(ClientData dummy, Tcl_Interp *interp, int argc, const char **argv)
 #else
 int Slp_TclCmdExit(dummy, interp, argc, argv)
 	ClientData dummy;	/* Not used. */
 	Tcl_Interp *interp;	/* Current interpreter. */
 	int argc;			/* Number of arguments. */
-	char **argv;		/* Argument strings. */
+	const char **argv;	/* Argument strings. */
 #endif
 {
 	int value;
@@ -465,13 +466,13 @@ int Slp_TclCmdExit(dummy, interp, argc, argv)
  *
  *_**********************************************************************/
 #ifdef __STDC__
-int Slp_TclCmdEcho(ClientData dummy, Tcl_Interp *interp, int argc, char **argv)
+int Slp_TclCmdEcho(ClientData dummy, Tcl_Interp *interp, int argc, const char **argv)
 #else
 int Slp_TclCmdEcho(dummy, interp, argc, argv)
 	ClientData dummy;	/* Not used. */
 	Tcl_Interp *interp;	/* Current interpreter. */
 	int argc;			/* Number of arguments. */
-	char *argv[];		/* Argument strings. */
+	const char *argv[];	/* Argument strings. */
 #endif
 {
 	char *string = NULL;
@@ -644,7 +645,7 @@ void Slp_StdinHandler()
 
 	static char *save_prompt = NULL;
 
-	gotPartial =0;
+	gotPartial = 0;
 
 	interp = Slp_GetTclInterp();
 
@@ -654,7 +655,7 @@ void Slp_StdinHandler()
 	parsed = input = Slp_getline(Slp_GetPrompt());
 
 	/* Parse for "\c" line continuation */
-	while ((*input != '\n') && (*input != NULL))
+	while ((*input != '\n') && (*input != '\0'))
 	{
 		if (*input++ == '\\')
 		{
@@ -662,7 +663,7 @@ void Slp_StdinHandler()
 			{
 				case 'c':
 					*input++ = '\n';
-					*input = NULL;
+					*input = '\0';
 					break;
 				case '\n':
 					break;
@@ -679,7 +680,7 @@ void Slp_StdinHandler()
 	{
 		gotPartial = 1;
 		Slp_SetPrompt("> ");
-		printf(Slp_GetPrompt());	/* Like PS2 */
+		printf("%s", Slp_GetPrompt());	/* Like PS2 */
 		fflush(stdout);
 		return;
 	}
@@ -711,7 +712,7 @@ void Slp_StdinHandler()
 		else
 			fprintf(stderr, "Error %d", result);
 
-		if (*interp->result != NULL)
+		if (*interp->result != '\0')
 			fprintf(stderr, ": %s\n", interp->result);
 		else
 			fprintf(stderr, "\n");
@@ -759,7 +760,7 @@ int sigval; /* 0 indicates should initialize signal () */
 
 		/* Set line width to new value. */
 		Slp_Window_Resize_Detected = 1;
-		Slp_ql_init(Columns);
+		Slp_gl_init(Columns);
 		Slp_Window_Resize_Detected = 0;
 
 		/* Execute a previous resize signal handler. */
