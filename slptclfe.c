@@ -56,14 +56,16 @@ MODIFICATION HISTORY
 	Alwyn Teh 940711	Port to Tcl v7.3
 	Alwyn Teh 950324	Port to ANSI C
 	Alwyn Teh 950426	Handle window resize.
-	Alwyn Teh 950825	Update Slp_TclEvalFile() with code from Tcl_EvalPile()
+	Alwyn Teh 950825	Update Slp_TclEvalFile() with code from Tcl_EvalFile()
 						in Tcl7.4
+	Alwyn Teh 211227	Use Tcl_GetStringResult()
 
 *****************************************************************************-*/
 
 /********************************** DEFINES ***********************************/
 #define DEF_PROMPT "Tcl-> "
 // #define USING_FULL_EVALFILE
+#define USE_INTERP_ERRORLINE
 
 /********************************** INCLUDES **********************************/
 #include <stdlib.h> /* For malloc(3C) */
@@ -86,7 +88,11 @@ MODIFICATION HISTORY
 #endif
 
 #include <tcl.h>
+#include <tclDecls.h>
 #include "slp.h"
+
+EXTERN int TclUpdateReturnInfo(Tcl_Interp *interp);
+// EXTERN int Tcl_GetErrorLine(Tcl_Interp *interp);
 
 /****************************** GLOBAL VARIABLES ******************************/
 /*
@@ -702,8 +708,8 @@ void Slp_StdinHandler()
 
 	if (result == TCL_OK)
 	{
-		if (*interp->result != 0)
-			SLP_PRINTF("%s\n", interp->result);
+		if (*Tcl_GetStringResult(interp) != 0)
+			SLP_PRINTF("%s\n", Tcl_GetStringResult(interp));
 	}
 	else
 	{
@@ -712,8 +718,8 @@ void Slp_StdinHandler()
 		else
 			fprintf(stderr, "Error %d", result);
 
-		if (*interp->result != '\0')
-			fprintf(stderr, ": %s\n", interp->result);
+		if (*Tcl_GetStringResult(interp) != '\0')
+			fprintf(stderr, ": %s\n", Tcl_GetStringResult(interp));
 		else
 			fprintf(stderr, "\n");
 	}

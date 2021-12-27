@@ -241,6 +241,11 @@ int (*gl_tab_hook) ANSI_PROTO((char *, int, int *)) = gl_tab;
 #	endif /* TIOCGETP */
 #endif /* unix | | __unix */
 
+#if defined(__APPLE__)
+#	include <sys/ioctl.h>
+#	include <termios.h>
+#endif
+
 #ifdef vms
 #include <descrip.h>
 #include <ttdef.h>
@@ -324,7 +329,7 @@ gl_getc ()
 	int		c;
 	char	ch;
 
-#if defined(unix) || defined(__unix)
+#if defined(unix) || defined(__unix) || defined(__APPLE__)
 	do {
 		c = 0;
 		ch = '\0';
@@ -502,7 +507,9 @@ char *prompt;
 	if (!gl_init_done)
 	  Slp_gl_init(80);
 
-	gl_buf[0] =0;				/* used as end of input indicator */
+	gl_buf[0] = 0;				/* used as end of input indicator */
+	memset(gl_buf, '\0', BUF_SIZE);
+
 	if (gl_init_done == 1) {	/* no input editing, and no prompt output */
 	  gl_gets(gl_buf, BUF_SIZE);
 	  return gl_buf;
@@ -517,6 +524,7 @@ char *prompt;
 	/* Ditched, because using ipc_mainloop() to drive input handler -- GJB
 	gl_puts(prompt);
 	 */
+	gl_puts(prompt); // ACST - 26/12/2021
 	if (gl_in_hook) {
 	  loc = gl_in_hook(gl_buf);
 	  if (loc >= 0)
@@ -534,9 +542,9 @@ char *prompt;
 					return gl_buf;
 					break;
 				case '\001': gl_fixup(-1, 0);			/* ^A */
-				break;
+					break;
 				case '\002': gl_fixup(-1, gl_pos-1);	/* ^B */
-				break;
+					break;
 				case '\004':							/* ^D */
 					if (gl_cnt == 0) {
 						gl_buf[0] = 0;
