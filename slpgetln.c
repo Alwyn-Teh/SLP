@@ -509,7 +509,7 @@ char *prompt;
 
 	gl_buf[0] = 0;				/* used as end of input indicator */
 	memset(gl_buf, '\0', BUF_SIZE);
-
+	printf("slpgetln.c: Slp_getline() - gl_buf = >>>%s<<<\n", gl_buf);
 	if (gl_init_done == 1) {	/* no input editing, and no prompt output */
 	  gl_gets(gl_buf, BUF_SIZE);
 	  return gl_buf;
@@ -531,7 +531,10 @@ char *prompt;
 		gl_fixup (0, BUF_SIZE);
 	}
 
+	printf("slpgetln.c: Slp_getline() entering while loop, calling gl_getc()...\n");
 	while ((c = gl_getc()) >= 0) {
+//		printf(".");
+//		fflush(stdout);
 		gl_extent = 0;
 		if (isprint(c)) {
 			gl_addchar(c);
@@ -623,7 +626,8 @@ int c;
 	int i ;
 
 	if (gl_cnt >= BUF_SIZE - 1) {
-		gl_puts("Slp_getline: input buffer overflow\n");
+		gl_puts("\nSlp_getline: input buffer overflow\n");
+		printf("slpgetln.c: gl_addchar(%c), gl_buf = %s\n", c, gl_buf);
 		_exit(1);
 	}
 	if (gl_overwrite == 0 || gl_pos == gl_cnt) {
