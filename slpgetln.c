@@ -524,7 +524,6 @@ char *prompt;
 	/* Ditched, because using ipc_mainloop() to drive input handler -- GJB
 	gl_puts(prompt);
 	 */
-	gl_puts(prompt); // ACST - 26/12/2021
 	if (gl_in_hook) {
 	  loc = gl_in_hook(gl_buf);
 	  if (loc >= 0)
