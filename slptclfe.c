@@ -403,7 +403,7 @@ int Slp_TclCmdSource(dummy, interp, argc, argv)
 /*+**********************************************************************
 ★
 *	NAME
-*	Slp_TclCmdExit{)
+*	Slp_TclCmdExit()
 *
 *	DESCRIPTION
 *	SLP's replacement for the standard built-in Tcl "exit" command.

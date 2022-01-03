@@ -406,7 +406,7 @@ int size;
 }
 
 static void
-#ifdef ___STDC__
+#ifdef __STDC__
 gl_puts(char *buf)
 #else
 gl_puts(buf)
