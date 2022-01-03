@@ -653,21 +653,16 @@ void Slp_StdinHandler()
 
 	gotPartial = 0;
 
-	printf("slptclfe.c: Slp_StdinHandler() calling Slp_GetTclInterp()\n");
 	interp = Slp_GetTclInterp();
-	printf("slptclfe.c: Slp_StdinHandler() interp = %d\n", interp);
 
 	if (save_prompt == NULL)
 		save_prompt = strdup(Slp_GetPrompt());
 
-	printf("slptclfe.c: Slp_StdinHandler() calling Slp_getline()\n");
 	parsed = input = Slp_getline(Slp_GetPrompt());
-	printf("slptclfe.c: input = >>>%s<<<\n", input);
 
 	/* Parse for "\c" line continuation */
 	while ((*input != '\n') && (*input != '\0'))
 	{
-		printf("slptclfe.c: while loop = %c\n", *input);
 		if (*input++ == '\\')
 		{
 			switch(*input)
@@ -685,24 +680,19 @@ void Slp_StdinHandler()
 		}
 	}
 
-	printf("slptclfe.c: Slp_StdinHandler() calling Tcl_DStringAppend()\n");
 	cmd = Tcl_DStringAppend(&slptclfe.buffer, parsed, -1);
-	printf("slptclfe.c: cmd = %s\n", cmd);
 
 	if ((parsed[0] != 0) && !Tcl_CommandComplete(cmd))
 	{
-		printf("slptclfe.c: Inside if !Tcl_CommandComplete(%s)\n", cmd);
 		gotPartial = 1;
 		Slp_SetPrompt("> ");
 		printf("%s", Slp_GetPrompt());	/* Like PS2 */
 		fflush(stdout);
-		printf("slptclfe.c: returning\n");
 		return;
 	}
 
 	gotPartial = 0;
 
-	printf("slptclfe.c: Slp_StdinHandler - Slp_SetPrompt(%s)\n", save_prompt);
 	Slp_SetPrompt(save_prompt);
 	if (save_prompt != NULL)
 		free(save_prompt);
@@ -710,18 +700,14 @@ void Slp_StdinHandler()
 
 	Slp_Command_In_Progress = 1;
 
-	printf("slptclfe.c: Slp_CharEchoOn()\n");
 	Slp_CharEchoOn(); /* in case Tcl command "gets stdin" is used */
 
-	printf("slptclfe.c: Tcl_RecordAndEval(%s)\n", cmd);
 	result = Tcl_RecordAndEval(interp, cmd, 0);
 
-	printf("slptclfe.c: Tcl_DStringTrunc()\n");
 	Tcl_DStringTrunc(&slptclfe.buffer, 0); /* empty buffer after use */
 
 	if (result == TCL_OK)
 	{
-		printf("slptclfe.c: result == TCL_OK\n");
 		if (*Tcl_GetStringResult(interp) != 0)
 			SLP_PRINTF("%s\n", Tcl_GetStringResult(interp));
 	}
@@ -740,14 +726,11 @@ void Slp_StdinHandler()
 
 	Slp_Command_In_Progress = 0;
 
-	printf("slptclfe.c: Slp_CharEchoOff()\n");
 	Slp_CharEchoOff();
 
-	printf("slptclfe.c: clearerr(stdin)\n");
 	clearerr(stdin);
 
 	if (!gotPartial) {
-		printf("slptclfe.c: if (!gotPartial) Slp_OutputPrompt()\n");
 		Slp_OutputPrompt();
 	}
 }
