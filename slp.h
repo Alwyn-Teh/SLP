@@ -72,7 +72,7 @@ EXTERN void			Slp_gl_redraw ANSI_PROTO((void));
 EXTERN void			Slp_gl_replace ANSI_PROTO((void));
 							/* toggle replace/insert mode */
 
-EXTERN int			(*Slp_Printf)ANSI_PROTO((char *format_string,...));
+EXTERN int			(*Slp_Printf)ANSI_PROTO((const char *format_string,...));
 											/* user-supplied printf which
 											   may perform output paging,
 											   defaults to printf() */

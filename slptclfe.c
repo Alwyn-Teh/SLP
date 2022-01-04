@@ -114,8 +114,8 @@ static struct
 	NULL	/* No buffer created		*/
 };
 
-typedef int (*printf_type)ANSI_PROTO((char *,...));
-int (*Slp_Printf )ANSI_PROTO( (char *fmtstr,...)) = (printf_type)printf;
+typedef int (*printf_type)ANSI_PROTO((const char *,...));
+int (*Slp_Printf)ANSI_PROTO((const char *fmtstr,...)) = (printf_type)printf;
 
 /* Must NOT let Slp_Printf be overwritten to NULL, if so, reset to printf. */
 #define SLP_PRINTF ((Slp_Printf != NULL) ? Slp_Printf : (Slp_Printf = (printf_type)printf))
@@ -709,7 +709,7 @@ void Slp_StdinHandler()
 	if (result == TCL_OK)
 	{
 		if (*Tcl_GetStringResult(interp) != 0)
-			SLP_PRINTF("%s\n", Tcl_GetStringResult(interp));
+		  SLP_PRINTF("%s\n", Tcl_GetStringResult(interp));
 	}
 	else
 	{
