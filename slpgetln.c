@@ -230,7 +230,7 @@ int (*gl_tab_hook) ANSI_PROTO((char *, int, int *)) = gl_tab;
 #include <bios.h>
 #endif
 
-#if defined(unix) || defined(__unix)
+#if defined(unix) || defined(__unix) || defined(linux)
 #	include <sys/ioctl.h>
 #	ifndef TIOCGETP
 #		include <termio.h>
@@ -262,7 +262,7 @@ gl_char_init()
 /* turn off input echo */
 
 {
-#if defined(unix) || defined(__unix)
+#if defined(unix) || defined(__unix) || defined(linux)
 	static int first_time = 1;
 #ifdef TIOCGETP
 	if (first_time) {
@@ -283,7 +283,7 @@ gl_char_init()
 	}
 	else
 	  tty = orig_tty;
-	tty. c_lflag &= ~(ICANON|ECHO|ECHOE|ECHOK|ECHONL);
+	tty.c_lflag &= ~(ICANON|ECHO|ECHOE|ECHOK|ECHONL);
 	tty.c_cc[VMIN] = 1;
 	tty.c_cc[VTIME] = 0;
 	ioctl(0, TCSETA, &tty);
@@ -306,7 +306,7 @@ static void
 gl_char_cleanup()
 /* undo effects of gl_char_init, as necessary */
 {
-#if defined(unix) || defined(__unix)
+#if defined(unix) || defined(__unix) || defined(linux)
 #ifdef TIOCSETP
 	ioctl(0, TIOCSETP, &orig_tty);
 #else
