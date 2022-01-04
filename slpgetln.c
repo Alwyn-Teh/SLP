@@ -434,7 +434,7 @@ int scrn_wdth;
 	    gl_char_init();
 	    gl_init_done = -1; /* -1 means terminal */
 	  } else {
-	    gl_init_done =1;	/* 1 means batch */
+	    gl_init_done = 1;	/* 1 means batch */
 	  }
 	}
 
@@ -572,7 +572,7 @@ char *prompt;
 					break;
 				case '\013': gl_kill();					/* ^K */
 					break;
-				case '\014': Slp_gl_redraw();			/* ~L */
+				case '\014': Slp_gl_redraw();			/* ^L */
 					break;
 				case '\016': hist_next();				/* ^N */
 					break;
