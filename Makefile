@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-I.
 RM = rm -f
 RANLIB = ranlib
-AR = ar rcul
+AR = ar rcs
 
 SLP_SRCS = slptclfe.c slpgetln.o
 SLP_OBJS = slptclfe.o slpgetln.o
